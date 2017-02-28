@@ -19,7 +19,7 @@
 
 bool new_data_available = false;
 uint8_t spi_frame[256];
-unsigned int sensor_value_counter = 0;
+unsigned int sensor_value_counter = 0, sensor_value_counter_prev = 0;
 
 WIFI_LOVE *whylove;
 
@@ -83,6 +83,8 @@ void setup()
 }
 
 void loop() {
-    Serial.println(sensor_value_counter);
+    uint8_t Hz = sensor_value_counter-sensor_value_counter_prev;
+    Serial.printf("%d Hz\n",Hz);
+    sensor_value_counter_prev = sensor_value_counter;
     delay(1000);
   }
