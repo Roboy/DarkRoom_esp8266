@@ -31,8 +31,10 @@ public:
     int     fmsgLogging_s(const uint8_t * buffer, size_t size); 
     int     fmsgSensorDataT_s(const uint8_t *buffer, size_t size); 
     int     fmsgSensorData_s(const uint8_t *buffer, size_t size); 
+    int     fmsgImuData_s(const uint8_t *buffer, size_t size); 
     bool    receiveCommand();
     bool    receiveConfig(); 
+    bool    sendImuData(Quaternion &q, VectorInt16 &acc, VectorFloat &gravity);
     int     getConnectionStatus();
     void    checkHostConfig();
     void    printIP(uint32_t ip);
@@ -46,6 +48,7 @@ public:
     uint16_t  commandPort  = 4210; 
     uint16_t  logginPort   = 0;  // will be received from host 
     uint16_t  configPort   = 8001;  
+    uint16_t  imuPort   = 0; // will be received from host 
 
     IPAddress hostIP;;
     IPAddress broadcastIP; 

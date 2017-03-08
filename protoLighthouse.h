@@ -3,9 +3,10 @@
 
 #include "logging.h"
 #include "pb.h"
-#include "lighthouse_sensor.pb.h"
+#include "lighthouse.pb.h"
 #include "pb_encode.h"
 #include "pb_decode.h"
+#include "helper_3dmath.h"
 
 typedef enum _ES{
     ES_WIFI_FAIL_INIT_NO_SHIELD = 1,
@@ -28,10 +29,12 @@ public:
     bool decode_command_Proto(pb_byte_t * buffer, size_t rcvd_msg_len);
     bool encode_trackedObjConfig(uint32_t ip, uint16_t cmndPort_l, pb_byte_t *buffer, size_t &msg_len );
     bool encode_loggingObject(const char *msg, pb_byte_t *buffer, size_t &msg_len);
+    bool encode_imuObjConfig(Quaternion &q, VectorInt16 &acc, VectorFloat &gravity, pb_byte_t *buffer, size_t &msg_len );
     bool enable_logging = true;
-	mkr1000_lighthouse_loggingObject            loggingObjMsg; 
-	mkr1000_lighthouse_commandObject            commandObjMsg; 
-	mkr1000_lighthouse_configObject             configObjMsg; 
+	DarkRoomProtobuf_loggingObject            loggingObjMsg; 
+	DarkRoomProtobuf_commandObject            commandObjMsg; 
+	DarkRoomProtobuf_configObject             configObjMsg; 
+  DarkRoomProtobuf_imuObject                imuObjMsg; 
 };
 
 #endif

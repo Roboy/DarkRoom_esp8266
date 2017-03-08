@@ -123,6 +123,16 @@ int WIFI_LOVE::fmsgSensorData_s(const uint8_t * buffer, size_t size)
     return (int) ES_WIFI_SUCCESS; 
 }
 
+int WIFI_LOVE::fmsgImuData_s(const uint8_t * buffer, size_t size)
+{
+    UDP.beginPacket(hostIP, imuPort); 
+    if(size != UDP.write(buffer, size)){
+        LOG(logERROR,"Size of the UDP Package to big! Truncated overlapping data"); 
+    }
+    UDP.endPacket();
+    return (int) ES_WIFI_SUCCESS; 
+}
+
 int WIFI_LOVE::getConnectionStatus(void)
 {
     int dV = LoveStatus; 
@@ -171,10 +181,12 @@ void WIFI_LOVE::checkHostConfig(){
                 hostIP = protoLove.configObjMsg.ip;
                 logginPort = protoLove.configObjMsg.logging_port; 
                 sensorPort = protoLove.configObjMsg.sensor_port;
+                imuPort = protoLove.configObjMsg.imu_port;
     
                 printIP(hostIP);
                 LOG_d(logINFO, "Logging Port Target PC :  ", protoLove.configObjMsg.logging_port); 
                 LOG_d(logINFO, "Sensor Port Target PC  :  ", protoLove.configObjMsg.sensor_port); 
+                LOG_d(logINFO, "Imu Port Target PC  :  ", protoLove.configObjMsg.imu_port); 
                 receivedConfig = true;
             }   
         }
@@ -191,5 +203,11 @@ void WIFI_LOVE::checkHostConfig(){
 
 void WIFI_LOVE::printIP(uint32_t ip){
     Serial.printf("IP: %d.%d.%d.%d\n", (ip>>0)&0xff, (ip>>8)&0xff, (ip>>16)&0xff, (ip>>24)&0xff);
+}
+
+bool WIFI_LOVE::sendImuData(Quaternion &q, VectorInt16 &acc, VectorFloat &gravity){
+    bool status = protoLove.encode_imuObjConfig(q,acc,gravity,buffer,msg_len);
+    fmsgImuData_s(buffer,msg_len);
+    return status;
 }
 
