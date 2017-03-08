@@ -14,13 +14,28 @@ void PROTO_LOVE::clearProtos()
 
 bool PROTO_LOVE::decode_config_Proto(pb_byte_t * buffer, size_t rcvd_msg_len)
 {
-    LOG(logINFO, "decode config Message Proto"); 
+    LOG(logDEBUG, "decode config Message Proto"); 
 
     pb_istream_t stream = pb_istream_from_buffer(buffer, rcvd_msg_len); 
     bool status = pb_decode(&stream, mkr1000_lighthouse_configObject_fields, &configObjMsg);  
 
     if(status){
-        LOG(logINFO, "decoded Config Message Proto: "); 
+        LOG(logDEBUG, "decoded Config Message Proto"); 
+    }else{
+        LOG(logERROR, "decoding failed"); 
+    }
+    return status; 
+}
+
+bool PROTO_LOVE::decode_command_Proto(pb_byte_t * buffer, size_t rcvd_msg_len)
+{
+    LOG(logDEBUG, "decode command Message Proto"); 
+
+    pb_istream_t stream = pb_istream_from_buffer(buffer, rcvd_msg_len); 
+    bool status = pb_decode(&stream, mkr1000_lighthouse_commandObject_fields, &commandObjMsg);  
+
+    if(status){
+        LOG(logDEBUG, "decoded command Message Proto"); 
     }else{
         LOG(logERROR, "decoding failed"); 
     }

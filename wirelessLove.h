@@ -31,6 +31,7 @@ public:
     int     fmsgLogging_s(const uint8_t * buffer, size_t size); 
     int     fmsgSensorDataT_s(const uint8_t *buffer, size_t size); 
     int     fmsgSensorData_s(const uint8_t *buffer, size_t size); 
+    bool    receiveCommand();
     bool    receiveConfig(); 
     int     getConnectionStatus();
     void    checkHostConfig();
@@ -51,6 +52,7 @@ public:
 
     WiFiUDP  UDP;
     PROTO_LOVE protoLove;
+    uint32_t command;
 
     size_t msg_len;
     pb_byte_t buffer[512] = {0};

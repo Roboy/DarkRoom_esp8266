@@ -24,7 +24,8 @@ class PROTO_LOVE{
 public:
     PROTO_LOVE(); 
     void clearProtos();
-    bool decode_config_Proto(pb_byte_t * buffer, size_t rcvd_msg_len);
+    bool decode_config_Proto(pb_byte_t * buffer, size_t rcvd_msg_len);    
+    bool decode_command_Proto(pb_byte_t * buffer, size_t rcvd_msg_len);
     bool encode_trackedObjConfig(uint32_t ip, uint16_t cmndPort_l, pb_byte_t *buffer, size_t &msg_len );
     bool encode_loggingObject(const char *msg, pb_byte_t *buffer, size_t &msg_len);
     bool enable_logging = true;

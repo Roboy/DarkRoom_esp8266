@@ -129,6 +129,21 @@ int WIFI_LOVE::getConnectionStatus(void)
     return dV; 
 }
 
+bool WIFI_LOVE::receiveCommand(){
+  int packetSize = UDP.parsePacket(); 
+  if(packetSize > 0 )
+  { 
+      unsigned char buffer[255]; 
+      size_t len = UDP.read(buffer , sizeof buffer); 
+      if(len > 0 && len < 60) 
+      {
+          buffer[len] = '\0'; 
+          if(protoLove.decode_command_Proto(buffer, len)){
+             command = protoLove.commandObjMsg.command;
+          }
+      }   
+  }
+}
 void WIFI_LOVE::checkHostConfig(){
     // wait for a config message
     bool receivedConfig = false;
