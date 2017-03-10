@@ -37,8 +37,6 @@ MPU6050 mpu;
 #define OUTPUT_READABLE_YAWPITCHROLL
 
 #define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
-#define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
-bool blinkState = false;
 
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
@@ -83,7 +81,11 @@ void setup()
 {
     Serial.begin(115200);
 
-    Serial.println("hi there");
+    Serial.println("");
+    Serial.println("------------------------------------------------------");
+    Serial.println("                    DARKROOM ESP");
+    Serial.println("------------------------------------------------------");
+
 
     IPAddress broadcastIP(192,168,0,255);
     whylove = new WIFI_LOVE ("roboy", "Roboy2016", broadcastIP);
@@ -120,14 +122,17 @@ void setup()
         whylove->fmsgSensorDataT_s( data, sizeof(uint8_t)*len);
     });
 
-     SPISlave.onStatusSent([]() {
-        Serial.println("Status Read By FPGA");
-    });
+//     SPISlave.onStatusSent([]() {
+//        Serial.println("Status Read By FPGA");
+//    });
 
     // Setup SPI Slave registers and pins
     SPISlave.begin();
 
-
+//    while(true){
+//      delay(1000);
+//      Serial.println(sensor_value_counter);
+//    }
     /************** SET UP MPU6050 *****************/
     Wire.begin();
     Wire.setClock(400000); // 400kHz I2C clock
@@ -162,8 +167,6 @@ void setup()
         attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
         mpuIntStatus = mpu.getIntStatus();
 
-        // set our DMP Ready flag so the main loop() function knows it's okay to use it
-        Serial.println(F("DMP ready! Waiting for first interrupt..."));
         dmpReady = true;
 
         // get expected DMP packet size for later comparison
@@ -177,9 +180,6 @@ void setup()
         Serial.print(devStatus);
         Serial.println(F(")"));
     }
-
-    // configure LED for output
-    pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
@@ -199,8 +199,11 @@ void loop() {
               break;
             case MPU:
               Serial.printf("Received MPU6050 toggle %s", (whylove->command>>4)?"true":"false");
+              dmpReady = whylove->command>>4;
+              break;
             case TRACKING:
               Serial.printf("Received Tracking toggle %s", (whylove->command>>4)?"true":"false");
+              break;
           }
         }
         yield();
@@ -237,9 +240,5 @@ void loop() {
         mpu.dmpGetGravity(&gravity, &q);
 
         whylove->sendImuData(q,aa,gravity);
-
-        // blink LED to indicate activity
-        blinkState = !blinkState;
-        digitalWrite(LED_PIN, blinkState);
     }
   }
