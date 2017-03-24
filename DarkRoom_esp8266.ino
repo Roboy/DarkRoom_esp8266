@@ -28,6 +28,7 @@ enum COMMAND{
 };
 
 bool new_data_available = false;
+bool send_mpu = false, send_sensor = false;
 uint8_t spi_frame[256];
 unsigned int sensor_value_counter = 0, sensor_value_counter_prev = 0;
 
@@ -119,7 +120,8 @@ void setup()
 //          
 //        }
         sensor_value_counter++;
-        whylove->fmsgSensorDataT_s( data, sizeof(uint8_t)*len);
+        if(send_sensor)
+          whylove->fmsgSensorDataT_s( data, sizeof(uint8_t)*len);
     });
 
 //     SPISlave.onStatusSent([]() {
@@ -183,11 +185,8 @@ void setup()
 }
 
 void loop() {
-    // if programming failed, don't try to do anything
-    if (!dmpReady) return;
-
     // wait for MPU interrupt or extra packet(s) available
-    while (!mpuInterrupt && fifoCount < packetSize) {
+    while ((!mpuInterrupt && fifoCount < packetSize) || !send_mpu) {
         if(whylove->receiveCommand()){
           // this command will be read by the fpga regularily
           SPISlave.setStatus(whylove->command);
@@ -199,15 +198,18 @@ void loop() {
               break;
             case MPU:
               Serial.printf("Received MPU6050 toggle %s", (whylove->command>>4)?"true":"false");
-              dmpReady = whylove->command>>4;
+              send_mpu = whylove->command>>4;
               break;
             case TRACKING:
               Serial.printf("Received Tracking toggle %s", (whylove->command>>4)?"true":"false");
+              send_sensor = whylove->command>>4;
               break;
           }
         }
         yield();
     }
+    // if programming failed, don't try to do anything
+    if (!dmpReady) return;
 
     // reset interrupt flag and get INT_STATUS byte
     mpuInterrupt = false;
