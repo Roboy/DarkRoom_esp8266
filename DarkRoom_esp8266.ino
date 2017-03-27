@@ -185,6 +185,7 @@ void setup()
 }
 
 void loop() {
+    yield();
     // wait for MPU interrupt or extra packet(s) available
     while ((!mpuInterrupt && fifoCount < packetSize) || !send_mpu) {
         if(whylove->receiveCommand()){
@@ -222,8 +223,8 @@ void loop() {
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
         // reset so we can continue cleanly
         mpu.resetFIFO();
+        yield();
         Serial.println(F("FIFO overflow!"));
-
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (mpuIntStatus & 0x02) {
         // wait for correct available data length, should be a VERY short wait
