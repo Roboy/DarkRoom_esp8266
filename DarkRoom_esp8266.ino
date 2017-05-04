@@ -91,8 +91,8 @@ void setup()
     Serial.println("------------------------------------------------------");
 
 
-    IPAddress broadcastIP(192,168,1,255);
-    whylove = new WIFI_LOVE ("hackroboy", "wiihackroboy", broadcastIP);
+    IPAddress broadcastIP(192,168,0,255);
+    whylove = new WIFI_LOVE ("roboy", "wiihackroboy", broadcastIP);
 
     /************** WIFI *****************************/
     if(ES_WIFI_SUCCESS != whylove->initWifi()){
@@ -193,7 +193,7 @@ void loop() {
     if (!dmpReady) return;
 
     // wait for MPU interrupt or extra packet(s) available
-    while (!mpuInterrupt && fifoCount < packetSize) {
+    do {
         if(whylove->receiveCommand()){
           // this command will be read by the fpga regularily
           SPISlave.setStatus(whylove->command);
@@ -213,7 +213,7 @@ void loop() {
           }
         }
         yield();
-    }
+    }while (!mpuInterrupt && fifoCount < packetSize);
 
     // reset interrupt flag and get INT_STATUS byte
     mpuInterrupt = false;

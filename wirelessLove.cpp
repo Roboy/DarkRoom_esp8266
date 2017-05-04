@@ -143,22 +143,22 @@ bool WIFI_LOVE::receiveCommand(){
   int packetSize = UDP.parsePacket(); 
   if(packetSize > 0 )
   {  
-      if(packetSize > 1){
-        unsigned char buffer[255]; 
-        size_t len = UDP.read(buffer , sizeof buffer); 
-        if(len > 0 && len < 60) 
-        {
-            buffer[len] = '\0'; 
-            if(protoLove.decode_command_Proto(buffer, len)){
-               command = protoLove.commandObjMsg.command;
-            }
-        }   
-      }else if(packetSize==1){
-         LOG(logINFO, "triggered!"); 
-         digitalWrite(TRIGGER_PIN, HIGH);
-         delay(1);
-         digitalWrite(TRIGGER_PIN, LOW);
-      }
+//      if(packetSize > 1){
+      unsigned char buffer[255]; 
+      size_t len = UDP.read(buffer , sizeof buffer); 
+      if(len > 0 && len < 60) 
+      {
+          buffer[len] = '\0'; 
+          if(protoLove.decode_command_Proto(buffer, len)){
+             command = protoLove.commandObjMsg.command;
+          }
+      }   
+//      }else if(packetSize==1){
+//         LOG(logINFO, "triggered!"); 
+//         digitalWrite(TRIGGER_PIN, HIGH);
+//         delay(1);
+//         digitalWrite(TRIGGER_PIN, LOW);
+//      }
   }
 }
 
