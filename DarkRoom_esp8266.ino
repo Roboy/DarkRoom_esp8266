@@ -28,7 +28,6 @@ enum COMMAND{
 };
 
 bool new_data_available = false;
-bool send_mpu = false, send_sensor = false;
 uint8_t spi_frame[256];
 unsigned int sensor_value_counter = 0, sensor_value_counter_prev = 0;
 
@@ -80,6 +79,10 @@ void printBits(uint32_t val){
 
 void setup()
 {
+    // set trigger pin
+    pinMode(TRIGGER_PIN, OUTPUT);
+    digitalWrite(TRIGGER_PIN, LOW);
+  
     Serial.begin(115200);
 
     Serial.println("");
@@ -88,8 +91,8 @@ void setup()
     Serial.println("------------------------------------------------------");
 
 
-    IPAddress broadcastIP(192,168,0,255);
-    whylove = new WIFI_LOVE ("roboy", "Roboy2016", broadcastIP);
+    IPAddress broadcastIP(192,168,1,255);
+    whylove = new WIFI_LOVE ("hackroboy", "wiihackroboy", broadcastIP);
 
     /************** WIFI *****************************/
     if(ES_WIFI_SUCCESS != whylove->initWifi()){
@@ -109,19 +112,20 @@ void setup()
 
     /************** SET UP SPI SLAVE OF FPGA*****************/
     SPISlave.onData([](uint8_t * data, size_t len) {
-//        Serial.printf("received data:\n");
-//        char str[33];
-//        for(uint i=0;i<len;i+=4){
-//          uint32_t val = uint32_t(data[i+3]<<24|data[i+2]<<16|data[i+1]<<8|data[i]);
-//          Serial.printf("%d:\t",i);
-//          printBits(val);
-//          Serial.println();
-//          Serial.printf("   \t%d\t%d\t%d\t%d\t\n", data[i+3], data[i+2], data[i+1], data[i] );
-//          
-//        }
+        if(sensor_value_counter%100==0){
+          Serial.printf("received %d sensor frames, this frame:\n", sensor_value_counter);
+          char str[33];
+          for(uint i=0;i<len;i+=4){
+            uint32_t val = uint32_t(data[i+3]<<24|data[i+2]<<16|data[i+1]<<8|data[i]);
+            Serial.printf("%d:\t",i);
+            printBits(val);
+            Serial.println();
+            Serial.printf("   \t%d\t%d\t%d\t%d\t\n", data[i+3], data[i+2], data[i+1], data[i] );
+            
+          }
+        }
         sensor_value_counter++;
-        if(send_sensor)
-          whylove->fmsgSensorDataT_s( data, sizeof(uint8_t)*len);
+        whylove->fmsgSensorDataT_s( data, sizeof(uint8_t)*len);
     });
 
 //     SPISlave.onStatusSent([]() {
@@ -185,9 +189,11 @@ void setup()
 }
 
 void loop() {
-    yield();
+    // if programming failed, don't try to do anything
+    if (!dmpReady) return;
+
     // wait for MPU interrupt or extra packet(s) available
-    while ((!mpuInterrupt && fifoCount < packetSize) || !send_mpu) {
+    while (!mpuInterrupt && fifoCount < packetSize) {
         if(whylove->receiveCommand()){
           // this command will be read by the fpga regularily
           SPISlave.setStatus(whylove->command);
@@ -199,18 +205,15 @@ void loop() {
               break;
             case MPU:
               Serial.printf("Received MPU6050 toggle %s", (whylove->command>>4)?"true":"false");
-              send_mpu = whylove->command>>4;
+              dmpReady = whylove->command>>4;
               break;
             case TRACKING:
               Serial.printf("Received Tracking toggle %s", (whylove->command>>4)?"true":"false");
-              send_sensor = whylove->command>>4;
               break;
           }
         }
         yield();
     }
-    // if programming failed, don't try to do anything
-    if (!dmpReady) return;
 
     // reset interrupt flag and get INT_STATUS byte
     mpuInterrupt = false;
@@ -223,8 +226,8 @@ void loop() {
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-        yield();
         Serial.println(F("FIFO overflow!"));
+
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (mpuIntStatus & 0x02) {
         // wait for correct available data length, should be a VERY short wait

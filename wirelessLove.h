@@ -17,6 +17,8 @@
 #include "logging.h"
 #include "protoLighthouse.h"
 
+#define TRIGGER_PIN 10
+
 class WIFI_LOVE{
 public:
     WIFI_LOVE(const char* ssid, const char* passwd, IPAddress &broadcastIP);
