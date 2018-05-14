@@ -46,13 +46,13 @@ public:
     char     pass[100]; 
     bool     timeout = false; 
 
-    uint16_t  sensorPort   = 0; // will be received from host 
+    uint16_t  sensorPort   = 8000; // will be received from host 
     uint16_t  commandPort  = 4210; 
-    uint16_t  logginPort   = 0;  // will be received from host 
+    uint16_t  logginPort   = 8002;  // will be received from host 
     uint16_t  configPort   = 8001;  
     uint16_t  imuPort   = 0; // will be received from host 
 
-    IPAddress hostIP;;
+    IPAddress hostIP;
     IPAddress broadcastIP; 
 
     WiFiUDP  UDP;

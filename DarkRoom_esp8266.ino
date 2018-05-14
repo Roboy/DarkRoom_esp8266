@@ -91,7 +91,7 @@ void setup()
     Serial.println("------------------------------------------------------");
 
 
-    IPAddress broadcastIP(192,168,0,255);
+    IPAddress broadcastIP(192,168,255,255);
     whylove = new WIFI_LOVE ("roboy", "wiihackroboy", broadcastIP);
 
     /************** WIFI *****************************/

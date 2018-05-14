@@ -13,7 +13,7 @@ broadcastIP(broadcastIP){
     WiFi.mode(WIFI_STA);
     WiFi.begin(SSID, PASSWD);
 
-//    hostIP = IPAddress(10,25,12,189);
+    hostIP = IPAddress(192,168,0,102);
 }
 
 int WIFI_LOVE::printWifiStatus(void)
@@ -95,7 +95,7 @@ int WIFI_LOVE::fmsgLogging_s(const uint8_t * buffer, size_t size)
 int WIFI_LOVE::fmsgSensorDataT_s(const uint8_t * buffer, size_t size)
 {
     LOG_d(logVERBOSE, "Send UDP Packet with Timestamp, size: ", size + timestampSize); 
-    if(UDP.beginPacket(hostIP, sensorPort) == 0){
+    if(UDP.beginPacket(broadcastIP, sensorPort) == 0){
       LOG(logWARNING, "Can not connect to the supplied IP or PORT");
     }
     unsigned long t = millis(); 
@@ -115,7 +115,7 @@ int WIFI_LOVE::fmsgSensorDataT_s(const uint8_t * buffer, size_t size)
 int WIFI_LOVE::fmsgSensorData_s(const uint8_t * buffer, size_t size)
 {
     printIP(hostIP);
-    UDP.beginPacket(hostIP, sensorPort); 
+    UDP.beginPacket(broadcastIP, sensorPort); 
     if(size != UDP.write(buffer, size)){
         LOG(logERROR,"Size of the UDP Package to big! Truncated overlapping data"); 
     }
@@ -125,7 +125,7 @@ int WIFI_LOVE::fmsgSensorData_s(const uint8_t * buffer, size_t size)
 
 int WIFI_LOVE::fmsgImuData_s(const uint8_t * buffer, size_t size)
 {
-    UDP.beginPacket(hostIP, imuPort); 
+    UDP.beginPacket(broadcastIP, imuPort); 
     if(size != UDP.write(buffer, size)){
         LOG(logERROR,"Size of the UDP Package to big! Truncated overlapping data"); 
     }
