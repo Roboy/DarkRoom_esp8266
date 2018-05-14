@@ -107,8 +107,8 @@ void setup()
 
     enableLogging = false;   
 
-    whylove->checkHostConfig();
-    LOG(logINFO, "received config");
+//    whylove->checkHostConfig();
+//    LOG(logINFO, "received config");
 
     /************** SET UP SPI SLAVE OF FPGA*****************/
     SPISlave.onData([](uint8_t * data, size_t len) {
